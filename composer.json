@@ -1,0 +1,38 @@
+{
+    "name": "demvsystems/smtp-credentials-validator",
+    "description": "SMTP-Anmeldedatenvalidierung",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Demvsystems",
+            "email": "admin@demv.de"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Demv\\Tarifservice\\Tarif\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Demv\\Tarifservice\\Tarif\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "ext-json": "*",
+        "symfony/serializer": "^4.0",
+        "dgame/php-ensurance": "^2.0",
+        "netresearch/jsonmapper": "^1.4"
+    },
+    "scripts": {
+        "test": [
+            "vendor/bin/phpunit"
+        ],
+        "coverage": [
+            "vendor/bin/phpunit --coverage-clover=coverage"
+        ]
+    }
+}
