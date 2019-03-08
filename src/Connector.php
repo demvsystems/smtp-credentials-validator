@@ -3,12 +3,15 @@
 class Connector
 {
     const RESPONSE_LENGTH = 4096;
-    const TIMEOUT         = 5;
 
+    /**
+     * @var resource
+     */
+    private $socket;
     /**
      * @var string
      */
-    private $host;
+    private $address;
     /**
      * @var int
      */
@@ -17,14 +20,6 @@ class Connector
      * @var string
      */
     private $response;
-    /**
-     * @var resource
-     */
-    private $connection;
-    /**
-     * @var int
-     */
-    private $errno;
     /**
      * @var string
      */
@@ -38,8 +33,8 @@ class Connector
      */
     public function __construct(string $host, int $port)
     {
-        $this->host = $host;
-        $this->port = $port;
+        $this->address = gethostbyname($host);
+        $this->port    = $port;
     }
 
     /**
@@ -47,12 +42,21 @@ class Connector
      */
     public function open(): bool
     {
-        $this->connection = fsockopen($this->host, $this->port, $this->errno, $this->errstr, self::TIMEOUT);
-        if ($this->errno || !$this->connection) {
+        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        if ($this->socket === false) {
+            $this->errstr = 'socket_create() fehlgeschlagen. Grund: ' . socket_strerror(socket_last_error()) . PHP_EOL;
+
             return false;
         }
 
-        $this->updateResponse();
+        $result = socket_connect($this->socket, $this->address, $this->port);
+        if ($result === false) {
+            $this->errstr = 'socket_connect() fehlgeschlagen. Grund: ' . socket_strerror(socket_last_error()) . PHP_EOL;
+
+            return false;
+        }
+
+        $this->read();
 
         return true;
     }
@@ -62,40 +66,45 @@ class Connector
      */
     public function send(string $msg)
     {
-        if ($this->isActive()) {
-            fputs($this->connection, $msg . "\r\n");
-            $this->updateResponse();
-        }
+        $this->write($msg);
+        $this->read();
     }
 
-    public function getReplyCode(): int
+    /**
+     * @param string $msg
+     *
+     * @return bool
+     */
+    private function write(string $msg): bool
     {
-        if (empty($this->response)) {
-            return 0;
-        }
+        $msg    .= "\r\n";
+        $length = strlen($msg);
+        $sent   = 0;
+        do {
+            $msg    = substr($msg, $sent);
+            $length -= $sent;
 
-        return (int) substr($this->response,0,3);
-    }
+            $sent = socket_write($this->socket, $msg, $length);
 
-    private function updateResponse()
-    {
-        $this->response = fgets($this->connection, self::RESPONSE_LENGTH);
+            if ($sent === false) {
+                return false;
+            }
+        } while ($sent < $length);
+
+        return true;
     }
 
     /**
      * @return int
      */
-    public function getErrNo(): int
+    public function getReplyCode(): int
     {
-        return $this->errno ?? 0;
+        return (int) substr($this->response, 0, 3) ?? 0;
     }
 
-    /**
-     * @return string
-     */
-    public function getErrStr(): string
+    private function read()
     {
-        return $this->errstr ?? '';
+        $this->response = socket_read($this->socket, self::RESPONSE_LENGTH);
     }
 
     /**
@@ -106,19 +115,20 @@ class Connector
         return $this->response ?? '';
     }
 
+
     /**
      * @return bool
      */
     public function hasErr(): bool
     {
-        return !empty($this->errno);
+        return !empty($this->errstr);
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function isActive(): bool
+    public function getErrstr(): string
     {
-        return !empty($this->connection);
+        return $this->errstr ?? '';
     }
 }

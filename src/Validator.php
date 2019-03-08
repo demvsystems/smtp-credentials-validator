@@ -8,6 +8,6 @@ class Validator
      */
     public function validateCredentials(Connector $connector)
     {
-
+        // todo
     }
 }
