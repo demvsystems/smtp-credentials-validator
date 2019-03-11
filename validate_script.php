@@ -3,42 +3,49 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Demv\SmtpCredentialsValidator\Connector;
+use Demv\SmtpCredentialsValidator\Helper;
 use Demv\SmtpCredentialsValidator\Validator;
 
-define('USE_TLS', false);
+define('USE_TLS', true);
 
-$host = 'test.smtp.org';
+$host = 'SMTP.office365.com';
 $port = 587;
 
-$email    = 'bit-bucket@test.smtp.org';
-$username = 'user04';
-$password = 'pass04';
+$email    = '';
+$username = '';
+$password = Helper::promptSilent();
 
 $connector = new Connector($host, $port);
 $connected = $connector->open();
 
 $userDomain = explode('@', $email)[1] ?? '';
 $connector->send('EHLO ' . $userDomain);
-echo('*** EHLO response before TLS ***' . PHP_EOL . $connector->getResponse() . PHP_EOL);
+echo('*** EHLO response ***' . PHP_EOL . $connector->getResponse() . PHP_EOL);
 if ($connector->getReplyCode() !== 250) {
     exit;
 }
 
-if (USE_TLS && !$connector->startTls()) {
-    exit;
-}
+if (USE_TLS) {
+    if (!$connector->startTls()) {
+        exit;
+    }
 
-$connector->send('EHLO ' . $userDomain);
-echo('*** EHLO response after TLS ***' . PHP_EOL . $connector->getResponse() . PHP_EOL);
-if ($connector->getReplyCode() !== 250) {
-    exit;
+    $connector->send('EHLO ' . $userDomain);
+    echo('*** EHLO response after TLS ***' . PHP_EOL . $connector->getResponse() . PHP_EOL);
+    if ($connector->getReplyCode() !== 250) {
+        exit;
+    }
 }
 
 $validator = new Validator();
-if ($validator->isValid($connector, $username, $password)) {
-    echo 'VALID!' . PHP_EOL;
+$isValid   = $validator->isValid($connector, $username, $password);
+
+if (!$isValid && in_array($connector->getReplyCode(), Validator::REPLY_CODES_BAD_CREDENTIALS)) {
+    echo '!!! BAD credentials !!!' . PHP_EOL . $connector->getResponse();
+} elseif (!$isValid) {
+    echo '!!! could NOT validate credentials !!!' . PHP_EOL . $connector->getResponse();
 } else {
-    echo 'NOT VALID!' . PHP_EOL;
+    echo '*** VALID ***' . PHP_EOL . $connector->getResponse();
 }
 
 if (!$connector->close()) {
