@@ -1,13 +1,34 @@
 <?php
 
+namespace Demv\SmtpCredentialsValidator;
+
 class Validator
 {
 
     /**
      * @param Connector $connector
+     * @param string    $username
+     * @param string    $password
+     *
+     * @return bool
      */
-    public function validateCredentials(Connector $connector)
+    public function isValid(Connector $connector, string $username, string $password): bool
     {
-        // todo
+        $connector->send('AUTH LOGIN');
+        if ($connector->getReplyCode() !== 334) {
+            return false;
+        }
+
+        $connector->send(base64_encode($username));
+        if ($connector->getReplyCode() !== 334) {
+            return false;
+        }
+
+        $connector->send(base64_encode($password));
+        if ($connector->getReplyCode() !== 235) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace Demv\SmtpCredentialsValidator;
+
 class Connector
 {
     const RESPONSE_LENGTH = 4096;
@@ -11,7 +13,7 @@ class Connector
     /**
      * @var string
      */
-    private $address;
+    private $host;
     /**
      * @var int
      */
@@ -20,10 +22,6 @@ class Connector
      * @var string
      */
     private $response;
-    /**
-     * @var string
-     */
-    private $errstr;
 
     /**
      * Connector constructor.
@@ -33,8 +31,32 @@ class Connector
      */
     public function __construct(string $host, int $port)
     {
-        $this->address = gethostbyname($host);
-        $this->port    = $port;
+        $this->host = $host;
+        $this->port = $port;
+    }
+
+    /**
+     * @return int 0 if no reply code
+     */
+    public function getReplyCode(): int
+    {
+        return (int) substr($this->response, 0, 3) ?? 0;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResponse(): string
+    {
+        return $this->response;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEncrypted(): bool
+    {
+        return isset(socket_get_status($this->socket)['crypto']);
     }
 
     /**
@@ -42,16 +64,16 @@ class Connector
      */
     public function open(): bool
     {
-        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $this->socket = stream_socket_client(
+            sprintf('tcp://%s:%s', $this->host, $this->port),
+            $errno,
+            $errstr,
+            10,
+            STREAM_CLIENT_CONNECT
+        );
+
         if ($this->socket === false) {
-            $this->errstr = 'socket_create() fehlgeschlagen. Grund: ' . socket_strerror(socket_last_error()) . PHP_EOL;
-
-            return false;
-        }
-
-        $result = socket_connect($this->socket, $this->address, $this->port);
-        if ($result === false) {
-            $this->errstr = 'socket_connect() fehlgeschlagen. Grund: ' . socket_strerror(socket_last_error()) . PHP_EOL;
+            $this->errstr = 'socket_create() fehlgeschlagen: #' . $errno . ': ' . $errstr . PHP_EOL;
 
             return false;
         }
@@ -59,6 +81,32 @@ class Connector
         $this->read();
 
         return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function close(): bool
+    {
+        $this->send('QUIT');
+
+        return $this->getReplyCode() === 221;
+    }
+
+    /**
+     * @param int $method
+     *
+     * @return bool
+     */
+    public function startTls(int $method): bool
+    {
+        $this->send('STARTTLS');
+        if ($this->getReplyCode() !== 220) {
+            return false;
+        }
+        stream_socket_enable_crypto($this->socket, true, $method);
+
+        return $this->isEncrypted();
     }
 
     /**
@@ -73,62 +121,17 @@ class Connector
     /**
      * @param string $msg
      *
-     * @return bool
-     */
-    private function write(string $msg): bool
-    {
-        $msg    .= "\r\n";
-        $length = strlen($msg);
-        $sent   = 0;
-        do {
-            $msg    = substr($msg, $sent);
-            $length -= $sent;
-
-            $sent = socket_write($this->socket, $msg, $length);
-
-            if ($sent === false) {
-                return false;
-            }
-        } while ($sent < $length);
-
-        return true;
-    }
-
-    /**
      * @return int
      */
-    public function getReplyCode(): int
+    private function write(string $msg): int
     {
-        return (int) substr($this->response, 0, 3) ?? 0;
+        $msg .= "\r\n";
+
+        return fputs($this->socket, $msg, self::RESPONSE_LENGTH);
     }
 
     private function read()
     {
-        $this->response = socket_read($this->socket, self::RESPONSE_LENGTH);
-    }
-
-    /**
-     * @return string
-     */
-    public function getResponse(): string
-    {
-        return $this->response ?? '';
-    }
-
-
-    /**
-     * @return bool
-     */
-    public function hasErr(): bool
-    {
-        return !empty($this->errstr);
-    }
-
-    /**
-     * @return string
-     */
-    public function getErrstr(): string
-    {
-        return $this->errstr ?? '';
+        $this->response = fread($this->socket, self::RESPONSE_LENGTH);
     }
 }

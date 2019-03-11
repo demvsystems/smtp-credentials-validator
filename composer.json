@@ -13,19 +13,16 @@
     },
     "autoload": {
         "psr-4": {
-            "Demv\\Tarifservice\\Tarif\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Demv\\Tarifservice\\Tarif\\Tests\\": "tests/"
+            "Demv\\SmtpCredentialsValidator\\": "src/"
         }
     },
     "require": {
         "ext-json": "*",
+        "ext-sockets": "*",
         "symfony/serializer": "^4.0",
         "dgame/php-ensurance": "^2.0",
-        "netresearch/jsonmapper": "^1.4"
+        "netresearch/jsonmapper": "^1.4",
+        "ext-openssl": "*"
     },
     "scripts": {
         "test": [
