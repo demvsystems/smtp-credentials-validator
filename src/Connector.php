@@ -5,6 +5,7 @@ namespace Demv\SmtpCredentialsValidator;
 class Connector
 {
     const RESPONSE_LENGTH = 4096;
+    const CRYPTO_METHOD   = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
 
     /**
      * @var resource
@@ -73,8 +74,6 @@ class Connector
         );
 
         if ($this->socket === false) {
-            $this->errstr = 'socket_create() fehlgeschlagen: #' . $errno . ': ' . $errstr . PHP_EOL;
-
             return false;
         }
 
@@ -94,17 +93,15 @@ class Connector
     }
 
     /**
-     * @param int $method
-     *
      * @return bool
      */
-    public function startTls(int $method): bool
+    public function startTls(): bool
     {
         $this->send('STARTTLS');
         if ($this->getReplyCode() !== 220) {
             return false;
         }
-        stream_socket_enable_crypto($this->socket, true, $method);
+        stream_socket_enable_crypto($this->socket, true, self::CRYPTO_METHOD);
 
         return $this->isEncrypted();
     }
