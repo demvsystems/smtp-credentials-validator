@@ -1,2 +1,2 @@
-# smtp-credentials-validator
+# smtp-validator
 SMTP-Anmeldedatenvalidierung
