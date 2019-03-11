@@ -18,7 +18,7 @@ $password = Helper::promptSilent();
 $connector = new Connector($host, $port);
 $connected = $connector->open();
 
-$userDomain = explode('@', $email)[1] ?? '';
+$userDomain = substr($email, strrpos($email, '@') + 1);
 $connector->send('EHLO ' . $userDomain);
 echo('*** EHLO response ***' . PHP_EOL . $connector->getResponse() . PHP_EOL);
 if ($connector->getReplyCode() !== 250) {
