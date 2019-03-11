@@ -5,12 +5,14 @@ require __DIR__ . '/vendor/autoload.php';
 use Demv\SmtpCredentialsValidator\Connector;
 use Demv\SmtpCredentialsValidator\Validator;
 
-$host = 'smtp.googlemail.com';
+define('USE_TLS', false);
+
+$host = 'test.smtp.org';
 $port = 587;
 
-$email    = '';
-$username = '';
-$password = '';
+$email    = 'bit-bucket@test.smtp.org';
+$username = 'user04';
+$password = 'pass04';
 
 $connector = new Connector($host, $port);
 $connected = $connector->open();
@@ -22,7 +24,7 @@ if ($connector->getReplyCode() !== 250) {
     exit;
 }
 
-if (!$connector->startTls()) {
+if (USE_TLS && !$connector->startTls()) {
     exit;
 }
 
