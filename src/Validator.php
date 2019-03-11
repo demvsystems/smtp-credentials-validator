@@ -4,7 +4,7 @@ namespace Demv\SmtpCredentialsValidator;
 
 class Validator
 {
-    const REPLY_CODES_BAD_CREDENTIALS = ['530', '535', '554'];
+    const REPLY_CODES_BAD_CREDENTIALS = [530, 535, 554];
 
     /**
      * @param Connector $connector
