@@ -12,7 +12,7 @@ class Helper
      *
      * @return string
      */
-    public static function promptSilent($prompt = "Enter Password:")
+    public static function promptSilent(string $prompt = 'Enter Password: '): string
     {
         if (preg_match('/^win/i', PHP_OS)) {
             $vbscript = sys_get_temp_dir() . 'prompt_password.vbs';
@@ -40,5 +40,18 @@ class Helper
 
             return $password;
         }
+    }
+
+    /**
+     * @param string $prompt
+     *
+     * @return string
+     */
+    public static function prompt(string $prompt): string
+    {
+        echo $prompt;
+        $handle = fopen('php://stdin', 'r');
+
+        return trim(fgets($handle));
     }
 }

@@ -11,8 +11,8 @@ define('USE_TLS', true);
 $host = 'SMTP.office365.com';
 $port = 587;
 
-$email    = '';
-$username = '';
+$email    = Helper::prompt('Enter Email: ');
+$username = $email;
 $password = Helper::promptSilent();
 
 $connector = new Connector($host, $port);

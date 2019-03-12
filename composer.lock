@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "4a4b44983110c2e2d6df84e071316d34",
+    "content-hash": "882a6ec935395e33eb698d99b1fe58af",
     "packages": [
         {
             "name": "dgame/php-ensurance",
@@ -1709,7 +1709,8 @@
     "prefer-lowest": false,
     "platform": {
         "ext-json": "*",
-        "ext-sockets": "*"
+        "ext-sockets": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": []
 }
