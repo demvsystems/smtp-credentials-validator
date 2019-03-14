@@ -2,7 +2,7 @@
 
 namespace Demv\SmtpCredentialsValidator;
 
-class Helper
+class PromptHelper
 {
 
     /**

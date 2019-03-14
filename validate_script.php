@@ -3,7 +3,7 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Demv\SmtpCredentialsValidator\Connector;
-use Demv\SmtpCredentialsValidator\Helper;
+use Demv\SmtpCredentialsValidator\PromptHelper;
 use Demv\SmtpCredentialsValidator\Validator;
 
 define('USE_TLS', true);
@@ -11,9 +11,9 @@ define('USE_TLS', true);
 $host = 'SMTP.office365.com';
 $port = 587;
 
-$email    = Helper::prompt('Enter Email: ');
+$email    = PromptHelper::prompt('Enter Email: ');
 $username = $email;
-$password = Helper::promptSilent();
+$password = PromptHelper::promptSilent();
 
 $connector = new Connector($host, $port);
 $connected = $connector->open();
