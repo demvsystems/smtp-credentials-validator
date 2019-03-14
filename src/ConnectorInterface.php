@@ -9,14 +9,6 @@ namespace Demv\SmtpValidator;
 interface ConnectorInterface
 {
     /**
-     * ConnectorInterface constructor.
-     *
-     * @param string $host
-     * @param int    $port
-     */
-    public function __construct(string $host, int $port);
-
-    /**
      * @return int
      */
     public function getReplyCode(): int;
