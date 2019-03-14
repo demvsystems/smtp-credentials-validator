@@ -1,5 +1,5 @@
 {
-    "name": "demvsystems/smtp-credentials-validator",
+    "name": "demvsystems/smtp-validator",
     "description": "SMTP-Anmeldedatenvalidierung",
     "type": "project",
     "authors": [
