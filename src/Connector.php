@@ -1,8 +1,15 @@
 <?php
 
-namespace Demv\SmtpCredentialsValidator;
+namespace Demv\SmtpValidator;
 
-class Connector
+/**
+ * Class Connector
+ *
+ * Wrapper for a socket connection to a smtp server.
+ *
+ * @package Demv\SmtpValidator
+ */
+class Connector implements ConnectorInterface
 {
     const RESPONSE_LENGTH = 4096;
     const CRYPTO_METHOD   = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
@@ -109,7 +116,7 @@ class Connector
     /**
      * @param string $msg
      */
-    public function send(string $msg)
+    public function send(string $msg): void
     {
         $this->write($msg);
         $this->read();

@@ -2,9 +2,9 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Demv\SmtpCredentialsValidator\Connector;
-use Demv\SmtpCredentialsValidator\PromptHelper;
-use Demv\SmtpCredentialsValidator\Validator;
+use Demv\SmtpValidator\Connector;
+use Demv\SmtpValidator\PromptHelper;
+use Demv\SmtpValidator\Validator;
 
 define('USE_TLS', true);
 

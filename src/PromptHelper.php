@@ -1,6 +1,6 @@
 <?php
 
-namespace Demv\SmtpCredentialsValidator;
+namespace Demv\SmtpValidator;
 
 class PromptHelper
 {
